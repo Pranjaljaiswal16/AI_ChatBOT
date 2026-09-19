@@ -12,7 +12,8 @@ function App() {
 
   // Initialize Socket.IO connection
   useEffect(() => {
-    socketRef.current = io("http://localhost:3000", {
+    // Same server par frontend + backend hai
+    socketRef.current = io({
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
@@ -113,14 +114,13 @@ function App() {
     if (socketRef.current && socketRef.current.connected) {
       console.log("Sending message:", messageText);
 
-      // IMPORTANT:
-      // Backend is listening for "ai-message"
       socketRef.current.emit("ai-message", {
         text: messageText,
       });
     } else {
-      setError("Not connected to server. Please check if backend is running.");
-
+      setError(
+        "Not connected to server. Please refresh the page and try again.",
+      );
       setIsLoading(false);
     }
   };

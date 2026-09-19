@@ -9,7 +9,11 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://ai-chatbot-vm09.onrender.com",
+    ],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -18,7 +22,6 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("A User connected:", socket.id);
 
-  // Har user/socket ki alag short memory
   const chatHistory = [];
 
   socket.on("disconnect", () => {
@@ -29,18 +32,17 @@ io.on("connection", (socket) => {
     try {
       const messageText = data?.text || data;
 
-      // User message memory mein add
+      if (!messageText) return;
+
       chatHistory.push({
         type: "text",
         text: messageText,
       });
 
-      // AI response
       const response = await generateResponse(chatHistory);
 
       console.log("AI response:", response);
 
-      // Frontend ko response
       socket.emit("ai-message-response", response);
     } catch (error) {
       console.error("AI Error:", error);
@@ -52,6 +54,8 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3000, () => {
-  console.log("Server is Running on Port 3000");
+const PORT = process.env.PORT || 3000;
+
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is Running on Port ${PORT}`);
 });
